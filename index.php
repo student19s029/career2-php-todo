@@ -1,15 +1,5 @@
 <?php
 
-//-------------------------------------
-//          todoリストアプリ作成
-//-------------------------------------
-
-//タスク名と期限を入力して作成できる
-//作成したタスクが期限の近いものから上に一覧になって表示できる
-//全てのタスクを削除できる
-//タスクの進捗(未着手, 作業中, 完了)を「変更ボタンを使って」更新できる
-
-
 require_once './todo.php';
 $todo = new Todo();
 
@@ -26,6 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
+    <link rel="stylesheet" type="text/css" href="sample.css">
     <title>TODO App</title>
 </head>
 <body>
@@ -35,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <h1 class="text-center text-primary py-3">TODO App</h1>
 
         <h2 class="text-muted py-3">TODO作成</h2>
-        <form method="POST" action="<?php print($_SERVER['PHP_SELF']) ?>">
+        <form method="POST" action="/career2-php-todo/index.php">
             <div class="form-group">
                 <label for="title">タスク名</label>
                 <input type="text" class="form-control" name="title" id="title" placeholder="タスク名" required>
@@ -45,9 +36,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="text" class="form-control" name="due_date" id="due_date" required>
             </div>
             <br><br>
-            <input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>">
+            <input type="hidden" name="token" value="ff77bf1a4e1365c589568883c665a2f2f7ab48f9">
             <input class="btn btn-primary"  type="submit" name="btn" value="TODOを作成する">
         </form>
+
+        <hr>
+
+        <h2 class="text-muted py-3">やること一覧</h2>
+
+        <?php
+        $todo_list = $todo->getList();
+        var_dump($todo_list);
+        ?>
+
+        <form method="POST" action="/index.php">
+            <input type="hidden" name="method" value="DELETE">
+            <button class="btn btn-danger" type="submit">TODOを全削除する</button>
+        </form>
+                <table class="table">
+            <thead>
+            <tr>
+                <th>タイトル</th>
+                <th>状態</th>
+                <th>期限</th>
+                <th>更新</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            foreach ($todo_list as $todo) {
+                ?>
+                <tr>
+                    <form method="POST" action="<?php print($_SERVER['PHP_SELF']) ?>">
+                        <td><?=$todo['title']; ?></td>
+                        <td><?=$todo['due_date']; ?></td>
+                        <td><?=$todo['status_for_display']; ?></td>
+                    </form>
+                </tr>
+                <?php
+            }
+            ?> 
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -65,11 +95,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <script src="https://npmcdn.com/flatpickr/dist/l10n/ja.js"></script>
 </script>
 <script>
-flatpickr(document.getElementById('due_date'), {
+  flatpickr(document.getElementById('due_date'), {
     locale: 'ja',
     dateFormat: "Y/m/d",
     minDate: new Date()
-});
+  });
 </script>
 </body>
 </html>
