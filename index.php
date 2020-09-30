@@ -4,7 +4,13 @@ require_once './todo.php';
 $todo = new Todo();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $todo->post($_POST['title'], $_POST['due_date']);
+    if (isset($_POST["method"]) && $_POST["method"] === "DELETE") {
+        $todo->delete();
+    } elseif (isset($_POST["method"]) && $_POST["method"] === "UPDATE") {
+        $todo->update($_POST["todo_id"], $_POST['status']);
+    } else {
+        $todo->post($_POST['title'], $_POST['due_date']);
+    }
 }
 ?>
 <!DOCTYPE>
@@ -26,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <h1 class="text-center text-primary py-3">TODO App</h1>
 
         <h2 class="text-muted py-3">TODO作成</h2>
-        <form method="POST" action="/career2-php-todo/index.php">
+        <form method="POST" action="<?php print($_SERVER['PHP_SELF']) ?>">
             <div class="form-group">
                 <label for="title">タスク名</label>
                 <input type="text" class="form-control" name="title" id="title" placeholder="タスク名" required>
@@ -36,29 +42,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="text" class="form-control" name="due_date" id="due_date" required>
             </div>
             <br><br>
-            <input type="hidden" name="token" value="ff77bf1a4e1365c589568883c665a2f2f7ab48f9">
+            <input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>">
             <input class="btn btn-primary"  type="submit" name="btn" value="TODOを作成する">
         </form>
 
         <hr>
 
         <h2 class="text-muted py-3">やること一覧</h2>
-
-        <?php
-        $todo_list = $todo->getList();
-        var_dump($todo_list);
-        ?>
-
-        <form method="POST" action="/index.php">
+        <form method="POST" action="<?php print($_SERVER['PHP_SELF']) ?>">
             <input type="hidden" name="method" value="DELETE">
             <button class="btn btn-danger" type="submit">TODOを全削除する</button>
         </form>
-                <table class="table">
+        <?php
+        $todo_list = $todo->getList();
+        ?>
+        <table class="table">
             <thead>
             <tr>
                 <th>タイトル</th>
-                <th>状態</th>
                 <th>期限</th>
+                <th>状態</th>
                 <th>更新</th>
             </tr>
             </thead>
@@ -70,12 +73,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <form method="POST" action="<?php print($_SERVER['PHP_SELF']) ?>">
                         <td><?=$todo['title']; ?></td>
                         <td><?=$todo['due_date']; ?></td>
-                        <td><?=$todo['status_for_display']; ?></td>
+                        <td class="label">
+                            <label>
+                                <select name="status" class="form-control">
+                                    <?php
+                                    foreach (Todo::STATUS as $key => $label) {
+                                        $is_selected = $key === $todo["status"] ? "selected": "";
+                                        echo "<option value='$key' $is_selected>$label</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </label>
+                        </td>
+                        <td>
+                            <input type="hidden" name="method" value="UPDATE">
+                            <input type="hidden" name="todo_id" value="<?=$todo["id"]; ?>">
+                            <button class="btn btn-primary" type="submit">変更</button>
+                        </td>
                     </form>
                 </tr>
                 <?php
             }
-            ?> 
+            ?>
             </tbody>
         </table>
     </div>
@@ -95,11 +114,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <script src="https://npmcdn.com/flatpickr/dist/l10n/ja.js"></script>
 </script>
 <script>
-  flatpickr(document.getElementById('due_date'), {
+flatpickr(document.getElementById('due_date'), {
     locale: 'ja',
     dateFormat: "Y/m/d",
     minDate: new Date()
-  });
+});
 </script>
 </body>
 </html>
