@@ -4,8 +4,10 @@ require_once './todo.php';
 $todo = new Todo();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    if (isset($_POST["method"]) && $_POST["method"] === "DELETE") {
-        $todo->delete();
+    if (isset($_POST["method"]) && $_POST["method"] === "DELETE_All") {
+        $todo->deleteAll();
+    } elseif (isset($_POST["method"]) && $_POST["method"] === "DELETE") {
+        $todo->delete($_POST["todo_id"]);
     } elseif (isset($_POST["method"]) && $_POST["method"] === "UPDATE") {
         $todo->update($_POST["todo_id"], $_POST['status']);
     } else {
@@ -28,8 +30,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
 
 <div class="container">
-    <div class="col-md-8">
-        <h1 class="text-center text-primary py-3">TODO App</h1>
+    <div class="col-md-12">
+        <h1 class="text-center text-primary py-3">TODO App<div class="star star1">★</div></h1>
 
         <h2 class="text-muted py-3">TODO作成</h2>
         <form method="POST" action="<?php print($_SERVER['PHP_SELF']) ?>">
@@ -50,11 +52,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <h2 class="text-muted py-3">やること一覧</h2>
         <form method="POST" action="<?php print($_SERVER['PHP_SELF']) ?>">
-            <input type="hidden" name="method" value="DELETE">
+            <input type="hidden" name="method" value="DELETE_ALL">
             <button class="btn btn-danger" type="submit">TODOを全削除する</button>
         </form>
         <?php
         $todo_list = $todo->getList();
+        //var_dump($todo_list);
         ?>
         <table class="table">
             <thead>
@@ -63,6 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <th>期限</th>
                 <th>状態</th>
                 <th>更新</th>
+                <th>削除</th>
             </tr>
             </thead>
             <tbody>
@@ -89,6 +93,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             <input type="hidden" name="method" value="UPDATE">
                             <input type="hidden" name="todo_id" value="<?=$todo["id"]; ?>">
                             <button class="btn btn-primary" type="submit">変更</button>
+                        </td>
+                        </form>
+                        <td>
+                        <form method="POST" action="<?php print($_SERVER['PHP_SELF']) ?>">
+                            <input type="hidden" name="method" value="DELETE">
+                            <input type="hidden" name="todo_id" value="<?=$todo["id"]; ?>">
+                            <button class="btn btn-danger" type="submit">削除</button>
+                        </form>
                         </td>
                     </form>
                 </tr>

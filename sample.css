@@ -2,3 +2,21 @@ th {
     color:black;
     background-color:red;
 }
+/* 
+<div class="star star1">★</div>
+*/
+.star {
+    display: inline-block;
+    font-size: 1em;
+  }
+   
+  .star1 {
+    animation: r1 1s linear infinite;
+  }
+   
+  @keyframes r1 {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+    
+   
+  }
